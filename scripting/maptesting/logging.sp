@@ -27,8 +27,7 @@ public void GiveLayoutPoll() {
 public void PollLogCallback(int totalCount) {
     char title[POLL_TITLE_LENGTH];
     GetPollTitle(title, sizeof(title));
-    LogToFile(g_PollLogFile, "Poll results:");
-    LogToFile(g_PollLogFile, "Question: %s", title);
+    LogToFile(g_PollLogFile, "Results for question %s:", title);
 
     for (int i = 0; i < GetPollNumChoices(); i++) {
         char choice[POLL_OPTION_LENGTH];

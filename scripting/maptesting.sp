@@ -64,7 +64,7 @@ public void OnPluginStart() {
     g_PollDuration = CreateConVar("sm_maptesting_poll_duration", "20", "How long the map vote should last if using map-votes", _, true, 10.0);
     AutoExecConfig(true, "maptesting");
 
-    RegAdminCmd("sm_createpoll", Command_CreatePoll, ADMFLAG_CHANGEMAP);
+    RegAdminCmd("sm_poll", Command_CreatePoll, ADMFLAG_CHANGEMAP);
 
     HookEvent("player_spawn", Event_PlayerSpawn);
     HookEvent("cs_win_panel_match", Event_MatchOver);
@@ -79,6 +79,11 @@ public void OnConfigsExecuted() {
 
 public Action Command_CreatePoll(int client, int args) {
     int numArgs = GetCmdArgs();
+
+    if (IsPollActive()) {
+        ReplyToCommand(client, "[SM] There is already an active poll");
+        return Plugin_Handled;
+    }
 
     if (numArgs < 3) {
         ReplyToCommand(client, "[SM] Usage: sm_poll <title> <options1> <option2> ...");
