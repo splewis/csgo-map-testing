@@ -2,7 +2,7 @@
 #include <sdktools>
 
 #if !defined PLUGIN_VERSION
-#define PLUGIN_VERSION "0.1.0-dev"
+#define PLUGIN_VERSION "0.1.0"
 #endif
 
 #define DEBUG_CVAR "sm_maptesting_debug"
