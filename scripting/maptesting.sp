@@ -21,6 +21,7 @@ ConVar g_InitialWarmupTime;
 ConVar g_FullTeamsWarmupTime;
 ConVar g_PostGameWarmupTime;
 ConVar g_FullPlayerCount;
+ConVar g_HideFedbackInChat;
 
 enum GameState {
     GameState_None = 0,
@@ -74,6 +75,8 @@ public void OnPluginStart() {
 
     g_FullPlayerCount = CreateConVar("sm_maptesting_numplayers_full_warmup_time", "10", "Desired number of players to start the \"primary\" warmup period");
 
+    g_HideFedbackInChat = CreateConVar("sm_maptesting_hide_feedback_in_chat", "1", "Whether to hide feedback-chat from being displayed in regular chat");
+
     AutoExecConfig(true, "maptesting");
 
     RegAdminCmd("sm_poll", Command_CreatePoll, ADMFLAG_CHANGEMAP);
@@ -119,6 +122,7 @@ public Action Command_CreatePoll(int client, int args) {
 }
 
 public void OnMapStart() {
+    g_GameState = GameState_None;
     char mapName[PLATFORM_MAX_PATH];
     GetCleanMapName(mapName, sizeof(mapName));
     BuildPath(Path_SM, g_ChatLogFile, sizeof(g_ChatLogFile), "logs/%s_chat.txt", mapName);
@@ -127,6 +131,9 @@ public void OnMapStart() {
 }
 
 public void OnClientConnected(int client) {
+    if (IsFakeClient(client))
+        return;
+
     if (g_GameState == GameState_None) {
         g_GameState = GameState_WaitingForPlayers;
         ServerCommand("mp_warmuptime %d", g_InitialWarmupTime.IntValue);
@@ -152,7 +159,11 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
         if (SplitStringRight(sArgs, feedbackTriggers[i], buffer, sizeof(buffer))) {
             TrimString(buffer);
             Logger_LogFeedback(client, buffer);
-            return Plugin_Continue;
+            if (g_HideFedbackInChat.IntValue != 0) {
+                return Plugin_Handled;
+            } else {
+                return Plugin_Continue;
+            }
         }
     }
 
