@@ -20,6 +20,7 @@ ConVar g_WarmupCfg;
 ConVar g_InitialWarmupTime;
 ConVar g_FullTeamsWarmupTime;
 ConVar g_PostGameWarmupTime;
+ConVar g_FullPlayerCount;
 
 enum GameState {
     GameState_None = 0,
@@ -68,8 +69,10 @@ public void OnPluginStart() {
     g_PollDuration = CreateConVar("sm_maptesting_poll_duration", "20", "How long the map vote should last if using map-votes", _, true, 10.0);
 
     g_InitialWarmupTime = CreateConVar("sm_maptesting_warmup_time_initial", "_time420", "Warmup time in seconds for when the first player connects");
-    g_FullTeamsWarmupTime = CreateConVar("sm_maptesting_warmup_time_full", "300", "Warmup time in seconds for when 10 players have joined");
+    g_FullTeamsWarmupTime = CreateConVar("sm_maptesting_warmup_time_full", "300", "Warmup time in seconds for when sm_maptesting_numplayers_full_warmup_time players have joined");
     g_PostGameWarmupTime = CreateConVar("sm_maptesting_warmup_time_post", "120", "Warmup time in seconds after a game ends");
+
+    g_FullPlayerCount = CreateConVar("sm_maptesting_numplayers_full_warmup_time", "10", "Desired number of players to start the \"primary\" warmup period");
 
     AutoExecConfig(true, "maptesting");
 
@@ -133,7 +136,7 @@ public void OnClientConnected(int client) {
 
     int connectedCount = GetConnectedClientCount();
 
-    if (g_GameState == GameState_Warmup && connectedCount >= 10) {
+    if (g_GameState == GameState_Warmup && connectedCount >= g_FullPlayerCount.IntValue) {
         g_GameState = GameState_Warmup;
         ServerCommand("mp_warmuptime %d", g_FullTeamsWarmupTime.IntValue);
     }
