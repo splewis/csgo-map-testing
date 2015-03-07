@@ -13,7 +13,7 @@ int __pollSelection[MAXPLAYERS+1] = -1;
 bool __activePoll = false;
 PollHandler __pollHandler;
 
-stock void CreatePoll(const char[] pollTitle, ArrayList choices, int duration, PollHandler handler) {
+stock void CreatePoll(const char[] pollTitle, ArrayList choices, int duration, PollHandler handler, int spacers=2) {
     if (__activePoll) {
         LogError("CreatePoll(%s) failed - there is already an active poll", pollTitle);
         return;
@@ -40,6 +40,10 @@ stock void CreatePoll(const char[] pollTitle, ArrayList choices, int duration, P
             Menu menu = new Menu(__PollMenuHandler);
             SetMenuExitButton(menu, true);
             SetMenuTitle(menu, pollTitle);
+
+            for (int j = 0; j < spacers; j++) {
+                menu.AddItem("linespacer", "", ITEMDRAW_SPACER);
+            }
 
             for (int j = 0; j < choices.Length; j++) {
                 char buffer[POLL_OPTION_LENGTH];
