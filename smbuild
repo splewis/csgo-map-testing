@@ -1,0 +1,8 @@
+GlobPlugins('scripting/*.sp')
+
+Package(name='maptesting',
+        plugins=Plugins('maptesting*'),
+        filegroups={
+            '.': ['LICENSE', 'README.md'],
+        },
+)
