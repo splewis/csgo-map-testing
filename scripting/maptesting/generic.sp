@@ -129,14 +129,14 @@ stock bool OnActiveTeam(int client) {
     return team == CS_TEAM_CT || team == CS_TEAM_T;
 }
 
-stock void PugSetupMessageToAll(const char[] format, any:...) {
+stock void PluginMessageToAll(const char[] format, any:...) {
     char display[512];
     VFormat(display, sizeof(display), format, 2);
     Colorize(display, sizeof(display));
     PrintToChatAll("[\x05MapCore\x01] %s", display);
 }
 
-stock void PugSetupMessage(int client, const char[] format, any:...) {
+stock void PluginMessage(int client, const char[] format, any:...) {
     char display[512];
     VFormat(display, sizeof(display), format, 2);
     Colorize(display, sizeof(display));

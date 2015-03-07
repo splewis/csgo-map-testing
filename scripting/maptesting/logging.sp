@@ -16,18 +16,18 @@ public void Logger_LogFeedback(int client, const char[] text) {
     }
 }
 
-public void GiveImpressionsPoll() {
+public void Logger_ImpressionPoll() {
     ServerCommand("sm_poll \"What are your initial impressions of the map?\" \"Neutral\" \"Like\" \"Dislike\"");
 }
 
-public void GiveLayoutPoll() {
+public void Logger_LayoutPoll() {
     ServerCommand("sm_poll \"How do you like the map layout?\" \"Neutral\" \"Like\" \"Dislike\"");
 }
 
 public void PollLogCallback(int totalCount) {
     char title[POLL_TITLE_LENGTH];
     GetPollTitle(title, sizeof(title));
-    LogToFile(g_PollLogFile, "Results for question %s:", title);
+    LogToFile(g_PollLogFile, "Results for question %s (taken at round %d):", title, g_RoundNumber);
 
     for (int i = 0; i < GetPollNumChoices(); i++) {
         char choice[POLL_OPTION_LENGTH];

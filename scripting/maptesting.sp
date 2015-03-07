@@ -17,6 +17,9 @@
 ConVar g_LiveCfg;
 ConVar g_PollDuration;
 ConVar g_WarmupCfg;
+ConVar g_InitialWarmupTime;
+ConVar g_FullTeamsWarmupTime;
+ConVar g_PostGameWarmupTime;
 
 enum GameState {
     GameState_None = 0,
@@ -28,6 +31,7 @@ enum GameState {
 };
 GameState g_GameState = GameState_None;
 
+int g_RoundNumber = 0;
 char g_ChatLogFile[PLATFORM_MAX_PATH];
 char g_FeedbackLogFile[PLATFORM_MAX_PATH];
 char g_PollLogFile[PLATFORM_MAX_PATH];
@@ -62,6 +66,11 @@ public void OnPluginStart() {
     g_LiveCfg = CreateConVar("sm_maptesting_live_cfg", "live.cfg", "Config to execute when the game goes live");
     g_WarmupCfg = CreateConVar("sm_maptesting_warmup_cfg", "warmup.cfg", "Config to execute for warmup periods");
     g_PollDuration = CreateConVar("sm_maptesting_poll_duration", "20", "How long the map vote should last if using map-votes", _, true, 10.0);
+
+    g_InitialWarmupTime = CreateConVar("sm_maptesting_warmup_time_initial", "_time420", "Warmup time in seconds for when the first player connects");
+    g_FullTeamsWarmupTime = CreateConVar("sm_maptesting_warmup_time_full", "300", "Warmup time in seconds for when 10 players have joined");
+    g_PostGameWarmupTime = CreateConVar("sm_maptesting_warmup_time_post", "120", "Warmup time in seconds after a game ends");
+
     AutoExecConfig(true, "maptesting");
 
     RegAdminCmd("sm_poll", Command_CreatePoll, ADMFLAG_CHANGEMAP);
@@ -117,7 +126,7 @@ public void OnMapStart() {
 public void OnClientConnected(int client) {
     if (g_GameState == GameState_None) {
         g_GameState = GameState_WaitingForPlayers;
-        ServerCommand("mp_warmuptime %d", 60*7);
+        ServerCommand("mp_warmuptime %d", g_InitialWarmupTime.IntValue);
         ServerCommand("mp_warmup_start");
         ExecCfg(g_WarmupCfg);
     }
@@ -126,13 +135,13 @@ public void OnClientConnected(int client) {
 
     if (g_GameState == GameState_Warmup && connectedCount >= 10) {
         g_GameState = GameState_Warmup;
-        ServerCommand("mp_warmuptime %d", 60*5);
+        ServerCommand("mp_warmuptime %d", g_FullTeamsWarmupTime.IntValue);
     }
 }
 
 public Action OnClientSayCommand(int client, const char[] command, const char[] sArgs) {
     char feedbackTriggers[][] = {
-        "!fb", "!feedback", "!bug", "!issue", "!gf", "!f"
+        "!fb", "!feedback", "!bug", "!issue", "!gf", "!f",
     };
 
     char buffer[256];
@@ -162,25 +171,25 @@ public Action Event_PlayerSpawn(Handle event, const char[] name, bool dontBroadc
 
 
 public Action Event_RoundStart(Handle event, const char[] name, bool dontBroadcast) {
-    int roundNumber = CS_GetTeamScore(CS_TEAM_CT) + CS_GetTeamScore(CS_TEAM_T) + 1;
-    LogDebug("Event_RoundStart, roundNumber = %d, state = %d", roundNumber, g_GameState);
+    g_RoundNumber = CS_GetTeamScore(CS_TEAM_CT) + CS_GetTeamScore(CS_TEAM_T) + 1;
+    LogDebug("Event_RoundStart, roundNumber = %d, state = %d", g_RoundNumber, g_GameState);
 
-    if (roundNumber == 1 && InWarmupState() && !InWarmupPeriod()) {
+    if (g_RoundNumber == 1 && InWarmupState() && !InWarmupPeriod()) {
         ServerCommand("exec gamemode_competitive");
         ExecCfg(g_LiveCfg);
         CreateTimer(3.0, BeginLO3);
     } else if (g_GameState == GameState_Done) {
         g_GameState = GameState_Warmup;
-        ServerCommand("mp_warmuptime %d", 60*3);
+        ServerCommand("mp_warmuptime %d", g_PostGameWarmupTime.IntValue);
         ServerCommand("mp_warmup_start");
         ExecCfg(g_WarmupCfg);
     } else if (g_GameState == GameState_Live) {
-        if (roundNumber == 2) {
-            GiveImpressionsPoll();
+        if (g_RoundNumber == 2) {
+            Logger_ImpressionPoll();
         }
 
-        if (roundNumber == GetConVarInt(FindConVar("mp_maxrounds")) - 1) {
-            GiveLayoutPoll();
+        if (g_RoundNumber == GetConVarInt(FindConVar("mp_maxrounds")) - 1) {
+            Logger_LayoutPoll();
         }
 
     }
