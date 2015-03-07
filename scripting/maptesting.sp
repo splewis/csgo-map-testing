@@ -68,7 +68,7 @@ public void OnPluginStart() {
     g_WarmupCfg = CreateConVar("sm_maptesting_warmup_cfg", "warmup.cfg", "Config to execute for warmup periods");
     g_PollDuration = CreateConVar("sm_maptesting_poll_duration", "20", "How long the map vote should last if using map-votes", _, true, 10.0);
 
-    g_InitialWarmupTime = CreateConVar("sm_maptesting_warmup_time_initial", "_time420", "Warmup time in seconds for when the first player connects");
+    g_InitialWarmupTime = CreateConVar("sm_maptesting_warmup_time_initial", "420", "Warmup time in seconds for when the first player connects");
     g_FullTeamsWarmupTime = CreateConVar("sm_maptesting_warmup_time_full", "300", "Warmup time in seconds for when sm_maptesting_numplayers_full_warmup_time players have joined");
     g_PostGameWarmupTime = CreateConVar("sm_maptesting_warmup_time_post", "120", "Warmup time in seconds after a game ends");
 
