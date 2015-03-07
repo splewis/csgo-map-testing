@@ -30,7 +30,7 @@ GameState g_GameState = GameState_None;
 
 char g_ChatLogFile[PLATFORM_MAX_PATH];
 char g_FeedbackLogFile[PLATFORM_MAX_PATH];
-char g_ImpressionsLogFile[PLATFORM_MAX_PATH];
+char g_PollLogFile[PLATFORM_MAX_PATH];
 
 
 #include "maptesting/generic.sp"
@@ -64,6 +64,8 @@ public void OnPluginStart() {
     g_PollDuration = CreateConVar("sm_maptesting_poll_duration", "20", "How long the map vote should last if using map-votes", _, true, 10.0);
     AutoExecConfig(true, "maptesting");
 
+    RegAdminCmd("sm_createpoll", Command_CreatePoll, ADMFLAG_CHANGEMAP);
+
     HookEvent("player_spawn", Event_PlayerSpawn);
     HookEvent("cs_win_panel_match", Event_MatchOver);
     HookEvent("round_start", Event_RoundStart);
@@ -75,12 +77,36 @@ public void OnConfigsExecuted() {
     ServerCommand("mp_do_warmup_period 1");
 }
 
+public Action Command_CreatePoll(int client, int args) {
+    int numArgs = GetCmdArgs();
+
+    if (numArgs < 3) {
+        ReplyToCommand(client, "[SM] Usage: sm_poll <title> <options1> <option2> ...");
+        return Plugin_Handled;
+    }
+
+    char title[POLL_TITLE_LENGTH];
+    GetCmdArg(1, title, sizeof(title));
+
+    ArrayList choices = new ArrayList(POLL_OPTION_LENGTH);
+    char buffer[POLL_OPTION_LENGTH];
+    for (int i = 2; i <= numArgs; i++) {
+        GetCmdArg(i, buffer, sizeof(buffer));
+        choices.PushString(buffer);
+    }
+
+    CreatePoll(title, choices, g_PollDuration.IntValue, PollLogCallback);
+
+    delete choices;
+    return Plugin_Handled;
+}
+
 public void OnMapStart() {
     char mapName[PLATFORM_MAX_PATH];
     GetCleanMapName(mapName, sizeof(mapName));
     BuildPath(Path_SM, g_ChatLogFile, sizeof(g_ChatLogFile), "logs/%s_chat.txt", mapName);
     BuildPath(Path_SM, g_FeedbackLogFile, sizeof(g_FeedbackLogFile), "logs/%s_feedback.txt", mapName);
-    BuildPath(Path_SM, g_ImpressionsLogFile, sizeof(g_ImpressionsLogFile), "logs/%s_impressions.txt", mapName);
+    BuildPath(Path_SM, g_PollLogFile, sizeof(g_PollLogFile), "logs/%s_polls.txt", mapName);
 }
 
 public void OnClientConnected(int client) {
