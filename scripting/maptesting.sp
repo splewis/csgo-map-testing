@@ -22,6 +22,7 @@ ConVar g_FullTeamsWarmupTime;
 ConVar g_PostGameWarmupTime;
 ConVar g_FullPlayerCount;
 ConVar g_HideFedbackInChat;
+ConVar g_RestartLength;
 
 enum GameState {
     GameState_None = 0,
@@ -74,8 +75,8 @@ public void OnPluginStart() {
     g_PostGameWarmupTime = CreateConVar("sm_maptesting_warmup_time_post", "120", "Warmup time in seconds after a game ends");
 
     g_FullPlayerCount = CreateConVar("sm_maptesting_numplayers_full_warmup_time", "10", "Desired number of players to start the \"primary\" warmup period");
-
     g_HideFedbackInChat = CreateConVar("sm_maptesting_hide_feedback_in_chat", "1", "Whether to hide feedback-chat from being displayed in regular chat");
+    g_RestartLength = CreateConVar("sm_maptesting_restart_duration", "3", "Length of the final game restart in the lo3");
 
     AutoExecConfig(true, "maptesting");
 

@@ -10,7 +10,7 @@ public Action BeginLO3(Handle timer) {
     // start lo3
     PluginMessageToAll("%t", "RestartCounter", 1);
     ServerCommand("mp_restartgame 1");
-    CreateTimer(3.0, Restart2);
+    CreateTimer(2.0, Restart2);
 
     return Plugin_Handled;
 }
@@ -18,15 +18,15 @@ public Action BeginLO3(Handle timer) {
 public Action Restart2(Handle timer) {
     PluginMessageToAll("%t", "RestartCounter", 2);
     ServerCommand("mp_restartgame 1");
-    CreateTimer(4.0, Restart3);
+    CreateTimer(2.0, Restart3);
 
     return Plugin_Handled;
 }
 
 public Action Restart3(Handle timer) {
     PluginMessageToAll("%t", "RestartCounter", 3);
-    ServerCommand("mp_restartgame 5");
-    CreateTimer(5.1, MatchLive);
+    ServerCommand("mp_restartgame %d", g_RestartLength.IntValue);
+    CreateTimer(float(g_RestartLength.IntValue) + 0.1, MatchLive);
 }
 
 public Action MatchLive(Handle timer) {
