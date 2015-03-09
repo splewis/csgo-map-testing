@@ -5,7 +5,6 @@
 #include "include/poll.inc"
 
 #pragma semicolon 1
-#pragma newdecls required
 
 /***********************
  *                     *
@@ -96,8 +95,8 @@ public void OnConfigsExecuted() {
 public Action Command_CreatePoll(int client, int args) {
     int numArgs = GetCmdArgs();
 
-    if (IsPollActive()) {
-        ReplyToCommand(client, "[SM] There is already an active poll");
+    if (CanMakePoll()) {
+        ReplyToCommand(client, "[SM] A poll cannot be created right now - try again in a few seconds.");
         return Plugin_Handled;
     }
 
@@ -204,6 +203,10 @@ public Action Event_PlayerSpawn(Handle event, const char[] name, bool dontBroadc
 public Action Event_RoundStart(Handle event, const char[] name, bool dontBroadcast) {
     g_RoundNumber = CS_GetTeamScore(CS_TEAM_CT) + CS_GetTeamScore(CS_TEAM_T) + 1;
     LogDebug("Event_RoundStart, roundNumber = %d, state = %d", g_RoundNumber, g_GameState);
+
+    if (GetConnectedClientCount() == 0) {
+        return;
+    }
 
     if (g_RoundNumber == 1 && InWarmupState() && !InWarmupPeriod()) {
         ServerCommand("exec gamemode_competitive");

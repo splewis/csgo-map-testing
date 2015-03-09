@@ -10,18 +10,16 @@ typedef PollHandler = function void (int totalCount);
 ArrayList __pollChoices;
 char __pollTitle[POLL_TITLE_LENGTH];
 int __pollSelection[MAXPLAYERS+1] = -1;
-bool __activePoll = false;
 PollHandler __pollHandler;
 
-stock void CreatePoll(const char[] pollTitle, ArrayList choices, int duration, PollHandler handler, int spacers=2) {
-    if (__activePoll) {
+stock bool CreatePoll(const char[] pollTitle, ArrayList choices, int duration, PollHandler handler, int spacers=2) {
+    if (!IsNewVoteAllowed()) {
         LogError("CreatePoll(%s) failed - there is already an active poll", pollTitle);
-        return;
+        return false;
     }
 
     strcopy(__pollTitle, sizeof(__pollTitle), pollTitle);
     __pollChoices = new ArrayList(POLL_OPTION_LENGTH);
-    __activePoll = true;
 
     for (int i = 0; i <= MAXPLAYERS; i++) {
         __pollSelection[i] = -1;
@@ -35,31 +33,25 @@ stock void CreatePoll(const char[] pollTitle, ArrayList choices, int duration, P
         __pollChoices.PushString(buffer);
     }
 
-    for (int i = 1; i <= MaxClients; i++) {
-        if (IsClientConnected(i) && IsClientInGame(i) && !IsFakeClient(i)) {
-            Menu menu = new Menu(__PollMenuHandler);
-            SetMenuExitButton(menu, true);
-            SetMenuTitle(menu, pollTitle);
-
-            for (int j = 0; j < spacers; j++) {
-                menu.AddItem("linespacer", "", ITEMDRAW_SPACER);
-            }
-
-            for (int j = 0; j < choices.Length; j++) {
-                char buffer[POLL_OPTION_LENGTH];
-                __pollChoices.GetString(j, buffer, sizeof(buffer));
-                AddMenuInt(menu, j, buffer);
-            }
-
-            menu.Display(i, duration);
-        }
+    Menu menu = new Menu(__PollMenuHandler);
+    SetVoteResultCallback(menu, __VotePollHandler);
+    SetMenuExitButton(menu, true);
+    SetMenuTitle(menu, pollTitle);
+    for (int j = 0; j < spacers; j++) {
+        menu.AddItem("linespacer", "", ITEMDRAW_SPACER);
     }
 
-    CreateTimer(float(duration), __PollTimerHandler);
+    for (int j = 0; j < choices.Length; j++) {
+        char buffer[POLL_OPTION_LENGTH];
+        __pollChoices.GetString(j, buffer, sizeof(buffer));
+        AddMenuInt(menu, j, buffer);
+    }
+
+    return VoteMenuToAll(menu, duration);
 }
 
-stock bool IsPollActive() {
-    return __activePoll;
+stock bool CanMakePoll() {
+    return !IsNewVoteAllowed();
 }
 
 stock int GetPollNumChoices() {
@@ -81,26 +73,25 @@ public void GetPollTitle(char[] buffer, int len) {
 }
 
 public int __PollMenuHandler(Menu menu, MenuAction action, int param1, int param2) {
-    if (action == MenuAction_Select) {
-        int client = param1;
-        int choice = GetMenuInt(menu, param2);
-        __pollSelection[client] = choice;
-
-    } else if (action == MenuAction_End) {
+    if (action == MenuAction_End) {
         CloseHandle(menu);
     }
 }
 
-public Action __PollTimerHandler(Handle timer) {
-    int totalCount = 0;
-    for (int i = 1; i <= MaxClients; i++) {
-        if (IsPlayer(i) && __pollSelection[i] != -1)
-            totalCount++;
+public int __VotePollHandler(Menu menu,
+                         int num_votes,
+                         int num_clients,
+                         const client_info[][2],
+                         int num_items,
+                         const item_info[][2]) {
+    for (int i = 0; i < num_clients; i++) {
+        int info = client_info[i][VOTEINFO_CLIENT_ITEM];
+        LogDebug("i = %d, client = %d, info = %d", i, client_info[i][VOTEINFO_CLIENT_INDEX], GetMenuInt(menu, info));
+        __pollSelection[client_info[i][VOTEINFO_CLIENT_INDEX]] = GetMenuInt(menu, info);
     }
 
     Call_StartFunction(INVALID_HANDLE, __pollHandler);
-    Call_PushCell(totalCount);
+    Call_PushCell(num_votes);
     Call_Finish();
-    __activePoll = false;
     delete __pollChoices;
 }
