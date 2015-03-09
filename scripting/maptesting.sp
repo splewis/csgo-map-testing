@@ -151,6 +151,17 @@ public void OnClientConnected(int client) {
 }
 
 public Action OnClientSayCommand(int client, const char[] command, const char[] sArgs) {
+    char helpTriggers[][] = {
+        "!help", "!info",
+    };
+
+    for (int i = 0; i < sizeof(helpTriggers); i++) {
+        if (StrEqual(sArgs, helpTriggers[i])) {
+            GivePlayerInfo(client);
+            return Plugin_Continue;
+        }
+    }
+
     char feedbackTriggers[][] = {
         "!fb", "!feedback", "!bug", "!issue", "!gf", "!f",
     };
@@ -160,6 +171,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
         if (SplitStringRight(sArgs, feedbackTriggers[i], buffer, sizeof(buffer))) {
             TrimString(buffer);
             Logger_LogFeedback(client, buffer);
+            PluginMessage(client, "Your feedback has been submitted.");
             if (g_HideFedbackInChat.IntValue != 0) {
                 return Plugin_Handled;
             } else {
@@ -171,6 +183,10 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
     Logger_LogChatMessage(client, sArgs);
 
     return Plugin_Continue;
+}
+
+public void GivePlayerInfo(int client) {
+    PluginMessage(client, "Type !fb or !gf to give feedback to the map developer.");
 }
 
 public Action Event_PlayerSpawn(Handle event, const char[] name, bool dontBroadcast) {
