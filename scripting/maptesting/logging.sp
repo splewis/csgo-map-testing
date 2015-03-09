@@ -27,11 +27,15 @@ public void Logger_LayoutPoll() {
 public void PollLogCallback(int totalCount) {
     char title[POLL_TITLE_LENGTH];
     GetPollTitle(title, sizeof(title));
-    LogToFile(g_PollLogFile, "Results for question %s (taken at round %d):", title, g_RoundNumber);
+    LogToFile(g_PollLogFile, "Results for question %s (taken at round %d), total votes = %d:", title, g_RoundNumber, totalCount);
+    PluginMessageToAll("The poll (%s) has ended", title);
+    PluginMessageToAll("Results:");
 
     for (int i = 0; i < GetPollNumChoices(); i++) {
         char choice[POLL_OPTION_LENGTH];
         int timesSelected = GetPollChoice(i, choice, sizeof(choice));
-        LogToFile(g_PollLogFile, "Option %d = %s, selected %d times (out of %d)", i+1, choice, timesSelected, totalCount);
+        float pct = 100.0*float(timesSelected)/float(totalCount);
+        LogToFile(g_PollLogFile, "Option %d = %s, selected %d/%d times (%.2f%)", i+1, choice, timesSelected, totalCount, pct);
+        PluginMessageToAll("  %s selected %d/%d times (%.2f\%)", choice, timesSelected, totalCount, pct);
     }
 }
