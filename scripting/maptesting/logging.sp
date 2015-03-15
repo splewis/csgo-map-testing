@@ -3,10 +3,12 @@ public void Logger_LogChatMessage(int client, const char[] text) {
     LogToFile(g_ChatLogFile, "%L says: %s", client, text);
 }
 
-public void Logger_LogFeedback(int client, const char[] text) {
+public void Logger_LogFeedback(int client, const char[] text, bool anonymous) {
     LogDebug("Logger_LogFeedback %L: %s", client, text);
 
-    if (OnActiveTeam(client)) {
+    if (anonymous) {
+        LogToFile(g_FeedbackLogFile, "Anonymous feedback: %s", text);
+    } else if (OnActiveTeam(client) && IsPlayerAlive(client)) {
         float origin[3];
         GetClientAbsAngles(client, origin);
         LogToFile(g_FeedbackLogFile, "%L at position (%f, %f, %f) has feedback: %s",

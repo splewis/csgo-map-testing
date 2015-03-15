@@ -22,6 +22,7 @@ ConVar g_PostGameWarmupTime;
 ConVar g_FullPlayerCount;
 ConVar g_HideFedbackInChat;
 ConVar g_RestartLength;
+ConVar g_AllowAnonymousFeedback;
 
 enum GameState {
     GameState_None = 0,
@@ -76,6 +77,7 @@ public void OnPluginStart() {
     g_FullPlayerCount = CreateConVar("sm_maptesting_numplayers_full_warmup_time", "10", "Desired number of players to start the \"primary\" warmup period");
     g_HideFedbackInChat = CreateConVar("sm_maptesting_hide_feedback_in_chat", "1", "Whether to hide feedback-chat from being displayed in regular chat");
     g_RestartLength = CreateConVar("sm_maptesting_restart_duration", "3", "Length of the final game restart in the lo3");
+    g_AllowAnonymousFeedback = CreateConVar("sm_maptesting_allow_anonymous_feedback", "1", "Whether uses can use /feedback commands to give anonymous feedback");
 
     AutoExecConfig(true, "maptesting");
 
@@ -161,17 +163,29 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
         }
     }
 
+    if (strlen(sArgs) <= 2) {
+        // no need to do anything with near-empty messages
+        return Plugin_Continue;
+    }
+
     char feedbackTriggers[][] = {
-        "!fb", "!feedback", "!bug", "!issue", "!gf", "!f",
+        "fb", "feedback", "bug", "issue", "gf",
     };
 
     char buffer[256];
     for (int i = 0; i < sizeof(feedbackTriggers); i++) {
-        if (SplitStringRight(sArgs, feedbackTriggers[i], buffer, sizeof(buffer))) {
+        if (SplitStringRight(sArgs, feedbackTriggers[i][1], buffer, sizeof(buffer))) {
+            bool anonymous = g_AllowAnonymousFeedback.IntValue != 0 && StrEqual(sArgs[0], "/");
             TrimString(buffer);
-            Logger_LogFeedback(client, buffer);
-            PluginMessage(client, "Your feedback has been submitted.");
-            if (g_HideFedbackInChat.IntValue != 0) {
+            Logger_LogFeedback(client, buffer, anonymous);
+
+            if (anonymous) {
+                PluginMessage(client, "Your feedback has been submitted anonymously.");
+            } else {
+                PluginMessage(client, "Your feedback has been submitted.");
+            }
+
+            if (g_HideFedbackInChat.IntValue != 0 || anonymous) {
                 return Plugin_Handled;
             } else {
                 return Plugin_Continue;
