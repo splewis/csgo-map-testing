@@ -7,7 +7,14 @@ public void Logger_LogFeedback(int client, const char[] text, bool anonymous) {
     LogDebug("Logger_LogFeedback %L: %s", client, text);
 
     if (anonymous) {
-        LogToFile(g_FeedbackLogFile, "Anonymous feedback: %s", text);
+        if (g_AnonymousMode.IntValue == 1) {
+            LogToFile(g_FeedbackLogFile, "%L has feedback: %s", client, text);
+        } else if (g_AnonymousMode.IntValue == 2) {
+            LogToFile(g_FeedbackLogFile, "Anonymous feedback: %s", text);
+        } else {
+            LogError("[Logger_LogFeedback] got unexpected g_AnonymousMode = %d", g_AnonymousMode.IntValue);
+        }
+
     } else if (OnActiveTeam(client) && IsPlayerAlive(client)) {
         float origin[3];
         GetClientAbsAngles(client, origin);
