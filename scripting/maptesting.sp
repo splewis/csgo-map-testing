@@ -23,6 +23,7 @@ ConVar g_FullPlayerCount;
 ConVar g_HideFedbackInChat;
 ConVar g_RestartLength;
 ConVar g_AllowAnonymousFeedback;
+ConVar g_MinPlayersForPoll;
 
 enum GameState {
     GameState_None = 0,
@@ -78,6 +79,7 @@ public void OnPluginStart() {
     g_HideFedbackInChat = CreateConVar("sm_maptesting_hide_feedback_in_chat", "1", "Whether to hide feedback-chat from being displayed in regular chat");
     g_RestartLength = CreateConVar("sm_maptesting_restart_duration", "3", "Length of the final game restart in the lo3");
     g_AllowAnonymousFeedback = CreateConVar("sm_maptesting_allow_anonymous_feedback", "1", "Whether uses can use /feedback commands to give anonymous feedback");
+    g_MinPlayersForPoll = CreateConVar("sm_maptesting_poll_min_players", "5", "Minimum number of players to be on the server to auto-give polls");
 
     AutoExecConfig(true, "maptesting");
 

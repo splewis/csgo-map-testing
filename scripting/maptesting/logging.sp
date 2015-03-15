@@ -19,11 +19,13 @@ public void Logger_LogFeedback(int client, const char[] text, bool anonymous) {
 }
 
 public void Logger_ImpressionPoll() {
-    ServerCommand("sm_poll \"What are your initial impressions of the map?\" \"Neutral\" \"Like\" \"Dislike\"");
+    if (GetConnectedClientCount() >= g_MinPlayersForPoll.IntValue)
+        ServerCommand("sm_poll \"What are your initial impressions of the map?\" \"Neutral\" \"Like\" \"Dislike\"");
 }
 
 public void Logger_LayoutPoll() {
-    ServerCommand("sm_poll \"How do you like the map layout?\" \"Neutral\" \"Like\" \"Dislike\"");
+    if (GetConnectedClientCount() >= g_MinPlayersForPoll.IntValue)
+        ServerCommand("sm_poll \"How do you like the map layout?\" \"Neutral\" \"Like\" \"Dislike\"");
 }
 
 public void PollLogCallback(int totalCount) {
