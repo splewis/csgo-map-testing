@@ -17,7 +17,7 @@ public void Logger_LogFeedback(int client, const char[] text, bool anonymous) {
 
     } else if (OnActiveTeam(client) && IsPlayerAlive(client)) {
         float origin[3];
-        GetClientAbsAngles(client, origin);
+        GetClientAbsOrigin(client, origin);
         LogToFile(g_FeedbackLogFile, "%L at position (%f, %f, %f) has feedback: %s",
                   client, origin[0], origin[1], origin[2], text);
     } else {
