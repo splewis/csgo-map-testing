@@ -51,7 +51,7 @@ stock bool CreatePoll(const char[] pollTitle, ArrayList choices, int duration, P
 }
 
 stock bool CanMakePoll() {
-    return !IsNewVoteAllowed();
+    return IsNewVoteAllowed();
 }
 
 stock int GetPollNumChoices() {
