@@ -2,7 +2,7 @@
 #include <sdktools>
 
 #if !defined PLUGIN_VERSION
-#define PLUGIN_VERSION "0.1.3"
+#define PLUGIN_VERSION "0.1.4"
 #endif
 
 #define DEBUG_CVAR "sm_maptesting_debug"
@@ -144,14 +144,14 @@ stock void PluginMessage(int client, const char[] format, any:...) {
 }
 
 // Thanks to KissLick https://forums.alliedmods.net/member.php?u=210752
-stock bool SplitStringRight(const char[] source, const char[] split, char[] part, int partLen) {
+// Returns the index the split started at in source, or -1 if no split found.
+stock int SplitStringRight(const char[] source, const char[] split, char[] part, int partLen) {
     int index = StrContains(source, split);
     if (index == -1)
-        return false;
+        return -1;
 
-    index += strlen(split);
-    strcopy(part, partLen, source[index]);
-    return true;
+    strcopy(part, partLen, source[index + strlen(split)]);
+    return index;
 }
 
 /**

@@ -176,7 +176,7 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 
     char buffer[256];
     for (int i = 0; i < sizeof(feedbackTriggers); i++) {
-        if (SplitStringRight(sArgs[1], feedbackTriggers[i], buffer, sizeof(buffer))) {
+        if (SplitStringRight(sArgs, feedbackTriggers[i], buffer, sizeof(buffer)) == 1) {
             bool anonymous = g_AnonymousMode.IntValue != 0 && StrEqual(sArgs[0], "/");
             TrimString(buffer);
             Logger_LogFeedback(client, buffer, anonymous);
