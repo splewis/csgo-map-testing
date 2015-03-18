@@ -24,6 +24,7 @@ ConVar g_HideFedbackInChat;
 ConVar g_RestartLength;
 ConVar g_AnonymousMode;
 ConVar g_MinPlayersForPoll;
+ConVar g_MatchFullAlltalk;
 
 enum GameState {
     GameState_None = 0,
@@ -80,14 +81,15 @@ public void OnPluginStart() {
     g_RestartLength = CreateConVar("sm_maptesting_restart_duration", "3", "Length of the final game restart in the lo3");
     g_AnonymousMode = CreateConVar("sm_maptesting_anonymous_feedback", "0", "How anonymous feedback (/fb instead of !fb) works: 0=completely disabled, 1=not displayed in chat, 2=not display+steamid/name not logged");
     g_MinPlayersForPoll = CreateConVar("sm_maptesting_poll_min_players", "5", "Minimum number of players to be on the server to auto-give polls");
+    g_MatchFullAlltalk = CreateConVar("sm_maptesting_match_full_alltalk", "1", "Whether to set sv_alltalk to the same value as sv_full_alltalk");
 
     AutoExecConfig(true, "maptesting");
 
     RegAdminCmd("sm_poll", Command_CreatePoll, ADMFLAG_CHANGEMAP);
 
-    HookEvent("player_spawn", Event_PlayerSpawn);
-    HookEvent("cs_win_panel_match", Event_MatchOver);
-    HookEvent("round_start", Event_RoundStart);
+    HookEvent("player_spawn", Event_PlayerSpawn, EventHookMode_Post);
+    HookEvent("cs_win_panel_match", Event_MatchOver, EventHookMode_Post);
+    HookEvent("round_start", Event_RoundStart, EventHookMode_Post);
 
     g_GameState = GameState_None;
 }
@@ -224,6 +226,8 @@ public Action Event_RoundStart(Handle event, const char[] name, bool dontBroadca
         return;
     }
 
+    FullAlltalkFix();
+
     if (g_RoundNumber == 1 && InWarmupState() && !InWarmupPeriod()) {
         ServerCommand("exec gamemode_competitive");
         ExecCfg(g_LiveCfg);
@@ -248,6 +252,7 @@ public Action Event_RoundStart(Handle event, const char[] name, bool dontBroadca
 public Action Event_MatchOver(Handle event, const char[] name, bool dontBroadcast) {
     LogDebug("Event_MatchOver");
     g_GameState = GameState_Done;
+    FullAlltalkFix();
 }
 
 public void ExecCfg(ConVar cvar) {
@@ -258,4 +263,12 @@ public void ExecCfg(ConVar cvar) {
 
 public bool InWarmupState() {
     return g_GameState <= GameState_Warmup;
+}
+
+static void FullAlltalkFix() {
+    if (g_MatchFullAlltalk.IntValue != 0) {
+        Handle fullCvar = FindConVar("sv_full_alltalk");
+        Handle allCvar = FindConVar("sv_alltalk");
+        SetConVarInt(fullCvar, GetConVarInt(allCvar));
+    }
 }
