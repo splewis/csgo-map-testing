@@ -49,7 +49,7 @@ stock bool CreatePoll(const char[] pollTitle, ArrayList choices, int duration, P
 }
 
 stock bool CanMakePoll() {
-    return IsNewVoteAllowed();
+    return !IsVoteInProgress();
 }
 
 public int __PollMenuHandler(Menu menu, MenuAction action, int param1, int param2) {

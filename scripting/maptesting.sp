@@ -99,7 +99,7 @@ public void OnConfigsExecuted() {
 public Action Command_CreatePoll(int client, int args) {
     int numArgs = GetCmdArgs();
 
-    if (CanMakePoll()) {
+    if (!CanMakePoll()) {
         ReplyToCommand(client, "[SM] A poll cannot be created right now - try again in a few seconds.");
         return Plugin_Handled;
     }
