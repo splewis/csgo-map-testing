@@ -45,7 +45,7 @@ public void PollLogCallback(int totalCount) {
     for (int i = 0; i < GetPollNumChoices(); i++) {
         char choice[POLL_OPTION_LENGTH];
         int timesSelected = GetPollChoice(i, choice, sizeof(choice));
-        float pct = 100.0*float(timesSelected)/float(totalCount);
+        float pct = 100.0*float(timesSelected) / float(totalCount);
         LogToFile(g_PollLogFile, "Option %d = %s, selected %d/%d times (%.2f%%)", i+1, choice, timesSelected, totalCount, pct);
         PluginMessageToAll("  %s selected %d/%d times (%.2f%%)", choice, timesSelected, totalCount, pct);
     }

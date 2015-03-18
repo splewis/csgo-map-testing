@@ -1,8 +1,9 @@
 #include <cstrike>
 #include <sdktools>
 
+#tryinclude "../include/maptesting_version.inc"
 #if !defined PLUGIN_VERSION
-#define PLUGIN_VERSION "0.1.4"
+#define PLUGIN_VERSION "0.2.0-dev"
 #endif
 
 #define DEBUG_CVAR "sm_maptesting_debug"

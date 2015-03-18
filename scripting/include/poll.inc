@@ -21,7 +21,7 @@ stock bool CreatePoll(const char[] pollTitle, ArrayList choices, int duration, P
     strcopy(__pollTitle, sizeof(__pollTitle), pollTitle);
     __pollChoices = new ArrayList(POLL_OPTION_LENGTH);
 
-    for (int i = 0; i <= MAXPLAYERS; i++) {
+    for (int i = 0; i <= sizeof(__pollSelection); i++) {
         __pollSelection[i] = -1;
     }
 
@@ -84,10 +84,14 @@ public int __VotePollHandler(Menu menu,
                          const client_info[][2],
                          int num_items,
                          const item_info[][2]) {
+    // reset all other poll results
+    for (int i = 0; i < sizeof(__pollSelection); i++)
+        __pollSelection[i] = -1;
+
     for (int i = 0; i < num_clients; i++) {
+        int client = client_info[i][VOTEINFO_CLIENT_INDEX];
         int info = client_info[i][VOTEINFO_CLIENT_ITEM];
-        LogDebug("i = %d, client = %d, info = %d", i, client_info[i][VOTEINFO_CLIENT_INDEX], GetMenuInt(menu, info));
-        __pollSelection[client_info[i][VOTEINFO_CLIENT_INDEX]] = GetMenuInt(menu, info);
+        __pollSelection[client] = GetMenuInt(menu, info);
     }
 
     Call_StartFunction(INVALID_HANDLE, __pollHandler);
