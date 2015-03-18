@@ -1,11 +1,6 @@
 #include <cstrike>
 #include <sdktools>
 
-#tryinclude "../include/maptesting_version.inc"
-#if !defined PLUGIN_VERSION
-#define PLUGIN_VERSION "0.2.0-dev"
-#endif
-
 #define DEBUG_CVAR "sm_maptesting_debug"
 #define MAX_INTEGER_STRING_LENGTH 16
 #define MAX_FLOAT_STRING_LENGTH 32

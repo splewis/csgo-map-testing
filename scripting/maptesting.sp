@@ -45,6 +45,7 @@ char g_PollLogFile[PLATFORM_MAX_PATH];
 #include "maptesting/generic.sp"
 #include "maptesting/liveon3.sp"
 #include "maptesting/logging.sp"
+#include "maptesting/version.sp"
 
 
 /***********************
