@@ -1,6 +1,8 @@
 csgo-map-testing
 ===========================
 
+[![Build status](http://ci.splewis.net/job/csgo-pug-setup/badge/icon)](http://ci.splewis.net/job/csgo-pug-setup/)
+
 This is plugin intended for facilitating some light playtesting of CS:GO maps, originally created for the [MapCore](mapcore.org) community.
 
 What it does:
@@ -10,6 +12,12 @@ What it does:
 3. Once warmup ends, the game starts normally
 4. Polls are given at the 2nd and 2nd-to-last automatically
 5. 3 things are logged into seperate files: 1) all chat messages, 2) feedback via the !feedback/!b/!gf command, and 3) the output of any polls made
+
+## Downloads
+
+You should be able to get the most recent download from https://github.com/splewis/csgo-map-testing/releases.
+
+You may also download the [latest development build](http://ci.splewis.net/job/csgo-map-testing/lastSuccessfulBuild/) if you wish. If you report any bugs from these, make sure to include the build number (when typing ``sm plugins list`` into the server console, the build number will be displayed with the plugin version).
 
 ## Installation
 
