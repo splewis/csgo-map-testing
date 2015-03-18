@@ -35,18 +35,19 @@ public void Logger_LayoutPoll() {
         ServerCommand("sm_poll \"How do you like the map layout?\" \"Neutral\" \"Like\" \"Dislike\"");
 }
 
-public void PollLogCallback(int totalCount) {
-    char title[POLL_TITLE_LENGTH];
-    GetPollTitle(title, sizeof(title));
-    LogToFile(g_PollLogFile, "Results for question %s (taken at round %d), total votes = %d:", title, g_RoundNumber, totalCount);
-    PluginMessageToAll("The poll (%s) has ended", title);
+public void PollLogCallback(const char[] pollTitle, int totalVotes, int numOptions, ArrayList numVotes, ArrayList optionNames) {
+    LogToFile(g_PollLogFile, "Results for question %s (taken at round %d), total votes = %d:", pollTitle, g_RoundNumber, totalVotes);
+    PluginMessageToAll("The poll (%s) has ended", pollTitle);
     PluginMessageToAll("Results:");
 
-    for (int i = 0; i < GetPollNumChoices(); i++) {
+    for (int i = 0; i < numOptions; i++) {
         char choice[POLL_OPTION_LENGTH];
-        int timesSelected = GetPollChoice(i, choice, sizeof(choice));
-        float pct = 100.0*float(timesSelected) / float(totalCount);
-        LogToFile(g_PollLogFile, "Option %d = %s, selected %d/%d times (%.2f%%)", i+1, choice, timesSelected, totalCount, pct);
-        PluginMessageToAll("  %s selected %d/%d times (%.2f%%)", choice, timesSelected, totalCount, pct);
+        optionNames.GetString(i, choice, sizeof(choice));
+
+        int timesSelected = numVotes.Get(i);
+        float pct = 100.0 * float(timesSelected) / float(totalVotes);
+
+        LogToFile(g_PollLogFile, "Option %d = %s, selected %d/%d times (%.2f%%)", i+1, choice, timesSelected, totalVotes, pct);
+        PluginMessageToAll("  %s selected %d/%d times (%.2f%%)", choice, timesSelected, totalVotes, pct);
     }
 }

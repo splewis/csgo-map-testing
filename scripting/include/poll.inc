@@ -5,11 +5,13 @@
 
 #define POLL_TITLE_LENGTH 128
 #define POLL_OPTION_LENGTH 64
-typedef PollHandler = function void (int totalCount);
 
-ArrayList __pollChoices;
+typedef PollHandler = function void (const char[] pollTitle, int totalVotes, int numOptions, ArrayList numVotes, ArrayList optionNames);
+
+ArrayList __pollOptionNames;
+ArrayList __pollVoteCounts;
+
 char __pollTitle[POLL_TITLE_LENGTH];
-int __pollSelection[MAXPLAYERS+1] = -1;
 PollHandler __pollHandler;
 
 stock bool CreatePoll(const char[] pollTitle, ArrayList choices, int duration, PollHandler handler, int spacers=2) {
@@ -19,18 +21,14 @@ stock bool CreatePoll(const char[] pollTitle, ArrayList choices, int duration, P
     }
 
     strcopy(__pollTitle, sizeof(__pollTitle), pollTitle);
-    __pollChoices = new ArrayList(POLL_OPTION_LENGTH);
-
-    for (int i = 0; i <= sizeof(__pollSelection); i++) {
-        __pollSelection[i] = -1;
-    }
-
+    __pollOptionNames = new ArrayList(POLL_OPTION_LENGTH);
+    __pollVoteCounts = new ArrayList();
     __pollHandler = handler;
 
     for (int i = 0; i < choices.Length; i++) {
         char buffer[POLL_OPTION_LENGTH];
         choices.GetString(i, buffer, sizeof(buffer));
-        __pollChoices.PushString(buffer);
+        __pollOptionNames.PushString(buffer);
     }
 
     Menu menu = new Menu(__PollMenuHandler);
@@ -43,7 +41,7 @@ stock bool CreatePoll(const char[] pollTitle, ArrayList choices, int duration, P
 
     for (int j = 0; j < choices.Length; j++) {
         char buffer[POLL_OPTION_LENGTH];
-        __pollChoices.GetString(j, buffer, sizeof(buffer));
+        __pollOptionNames.GetString(j, buffer, sizeof(buffer));
         AddMenuInt(menu, j, buffer);
     }
 
@@ -54,24 +52,6 @@ stock bool CanMakePoll() {
     return IsNewVoteAllowed();
 }
 
-stock int GetPollNumChoices() {
-    return __pollChoices.Length;
-}
-
-stock int GetPollChoice(int pollChoice, char[] buffer, int len) {
-    __pollChoices.GetString(pollChoice, buffer, len);
-    int count = 0;
-    for (int i = 1; i <= MaxClients; i++) {
-        if (__pollSelection[i] == pollChoice)
-            count++;
-    }
-    return count;
-}
-
-public void GetPollTitle(char[] buffer, int len) {
-    strcopy(buffer, len, __pollTitle);
-}
-
 public int __PollMenuHandler(Menu menu, MenuAction action, int param1, int param2) {
     if (action == MenuAction_End) {
         CloseHandle(menu);
@@ -79,23 +59,26 @@ public int __PollMenuHandler(Menu menu, MenuAction action, int param1, int param
 }
 
 public int __VotePollHandler(Menu menu,
-                         int num_votes,
-                         int num_clients,
-                         const client_info[][2],
-                         int num_items,
-                         const item_info[][2]) {
-    // reset all other poll results
-    for (int i = 0; i < sizeof(__pollSelection); i++)
-        __pollSelection[i] = -1;
+                             int totalVotes,
+                             int numClients,
+                             const clientInfo[][2],
+                             int numItems,
+                             const itemInfo[][2]) {
 
-    for (int i = 0; i < num_clients; i++) {
-        int client = client_info[i][VOTEINFO_CLIENT_INDEX];
-        int info = client_info[i][VOTEINFO_CLIENT_ITEM];
-        __pollSelection[client] = GetMenuInt(menu, info);
+    for (int i = 0; i < numClients; i++) {
+        int choiceIndex = clientInfo[i][VOTEINFO_CLIENT_ITEM];
+        int curVotes = __pollVoteCounts.Get(choiceIndex);
+        __pollVoteCounts.Set(choiceIndex, curVotes + 1);
     }
 
     Call_StartFunction(INVALID_HANDLE, __pollHandler);
-    Call_PushCell(num_votes);
+    Call_PushString(__pollTitle);
+    Call_PushCell(totalVotes);
+    Call_PushCell(numItems);
+    Call_PushCell(__pollVoteCounts);
+    Call_PushCell(__pollOptionNames);
     Call_Finish();
-    delete __pollChoices;
+
+    delete __pollVoteCounts;
+    delete __pollOptionNames;
 }
