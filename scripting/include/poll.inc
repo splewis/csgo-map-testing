@@ -11,6 +11,7 @@ typedef PollHandler = function void (const char[] pollTitle, int totalVotes, int
 ArrayList __pollOptionNames;
 ArrayList __pollVoteCounts;
 
+int __numSpacers;
 char __pollTitle[POLL_TITLE_LENGTH];
 PollHandler __pollHandler;
 
@@ -24,11 +25,13 @@ stock bool CreatePoll(const char[] pollTitle, ArrayList choices, int duration, P
     __pollOptionNames = new ArrayList(POLL_OPTION_LENGTH);
     __pollVoteCounts = new ArrayList();
     __pollHandler = handler;
+    __numSpacers = spacers;
 
     for (int i = 0; i < choices.Length; i++) {
         char buffer[POLL_OPTION_LENGTH];
         choices.GetString(i, buffer, sizeof(buffer));
         __pollOptionNames.PushString(buffer);
+        __pollVoteCounts.Push(0);
     }
 
     Menu menu = new Menu(__PollMenuHandler);
@@ -49,7 +52,7 @@ stock bool CreatePoll(const char[] pollTitle, ArrayList choices, int duration, P
 }
 
 stock bool CanMakePoll() {
-    return !IsVoteInProgress();
+    return IsNewVoteAllowed();
 }
 
 public int __PollMenuHandler(Menu menu, MenuAction action, int param1, int param2) {
@@ -64,11 +67,10 @@ public int __VotePollHandler(Menu menu,
                              const clientInfo[][2],
                              int numItems,
                              const itemInfo[][2]) {
-
-    for (int i = 0; i < numClients; i++) {
-        int choiceIndex = clientInfo[i][VOTEINFO_CLIENT_ITEM];
-        int curVotes = __pollVoteCounts.Get(choiceIndex);
-        __pollVoteCounts.Set(choiceIndex, curVotes + 1);
+    for (int i = 0; i < numItems; i++) {
+        int itemIndex = itemInfo[i][VOTEINFO_ITEM_INDEX];
+        int itemVotes = itemInfo[i][VOTEINFO_ITEM_VOTES];
+        __pollVoteCounts.Set(itemIndex - __numSpacers, itemVotes);
     }
 
     Call_StartFunction(INVALID_HANDLE, __pollHandler);
