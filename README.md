@@ -3,7 +3,7 @@ csgo-map-testing
 
 [![Build status](http://ci.splewis.net/job/csgo-pug-setup/badge/icon)](http://ci.splewis.net/job/csgo-pug-setup/)
 
-This is plugin intended for facilitating some light playtesting of CS:GO maps, originally created for the [MapCore](mapcore.org) community.
+This is a simple plugin intended for facilitating some light playtesting of CS:GO maps, originally created for the [MapCore](mapcore.org) community.
 
 What it does:
 
