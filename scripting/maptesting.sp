@@ -25,6 +25,7 @@ ConVar g_RestartLength;
 ConVar g_AnonymousMode;
 ConVar g_MinPlayersForPoll;
 ConVar g_MatchFullAlltalk;
+ConVar g_PollSpacers;
 
 enum GameState {
     GameState_None = 0,
@@ -83,6 +84,7 @@ public void OnPluginStart() {
     g_AnonymousMode = CreateConVar("sm_maptesting_anonymous_feedback", "0", "How anonymous feedback (/fb instead of !fb) works: 0=completely disabled, 1=not displayed in chat, 2=not display+steamid/name not logged");
     g_MinPlayersForPoll = CreateConVar("sm_maptesting_poll_min_players", "5", "Minimum number of players to be on the server to auto-give polls");
     g_MatchFullAlltalk = CreateConVar("sm_maptesting_match_full_alltalk", "1", "Whether to set sv_alltalk to the same value as sv_full_alltalk");
+    g_PollSpacers = CreateConVar("sm_maptesting_poll_spacers", "2", "Number of empty lines in poll menus (using 2 means the first option is on key 3)");
 
     AutoExecConfig(true, "maptesting");
 
@@ -122,7 +124,7 @@ public Action Command_CreatePoll(int client, int args) {
         choices.PushString(buffer);
     }
 
-    CreatePoll(title, choices, g_PollDuration.IntValue, PollLogCallback);
+    CreatePoll(title, choices, g_PollDuration.IntValue, PollLogCallback, g_PollSpacers.IntValue);
 
     delete choices;
     return Plugin_Handled;
