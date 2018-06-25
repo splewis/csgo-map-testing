@@ -1,0 +1,11 @@
+"Phrases"
+{
+	"RestartCounter"
+	{
+		"chi"		"重启 {1}/3"
+	}
+	"Live"
+	{
+		"chi"		"{GREEN}已开始{NORMAL}游戏测试"
+	}
+}
